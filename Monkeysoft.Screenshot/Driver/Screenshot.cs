@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using Size = System.Drawing.Size;
@@ -123,6 +124,7 @@ namespace Monkeysoft.Screenshot.Driver
             window.List.ItemsSource = windows;
             if (window.ShowDialog() ?? false)
             {
+                Task.Delay(TimeSpan.FromSeconds(0.5)).Wait();
                 return CaptureWindow(windows[window.List.SelectedIndex].WindowHandle);
             }
 
