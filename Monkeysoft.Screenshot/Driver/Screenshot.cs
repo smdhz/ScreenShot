@@ -1,13 +1,10 @@
-﻿using Microsoft.VisualBasic;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Documents.DocumentStructures;
 using System.Windows.Media.Imaging;
 using Size = System.Drawing.Size;
 
@@ -15,9 +12,11 @@ namespace Monkeysoft.Screenshot.Driver
 {
     public class Screenshot
     {
-        public static Bitmap CaptureWindow(IntPtr handle)
+        private static Screenshot instance;
+        public static Screenshot GetInstance() => instance ??= new Screenshot();
+
+        private Bitmap CaptureWindow(IntPtr handle)
         {
-            var bitmap = CaptureAllScreens();
             Rectangle rect = Rectangle.Empty;
 
             if (IsDWMEnabled() && NativeMethods.GetExtendedFrameBounds(handle, out Rectangle tempRect))
@@ -44,7 +43,7 @@ namespace Monkeysoft.Screenshot.Driver
             return CaptureRectangleNative(NativeMethods.GetDesktopWindow(), rect);
         }
 
-        private static Bitmap CaptureRectangleNative(IntPtr handle, Rectangle rect)
+        private Bitmap CaptureRectangleNative(IntPtr handle, Rectangle rect)
         {
             IntPtr hdcSrc = NativeMethods.GetWindowDC(handle);
             IntPtr hdcDest = NativeMethods.CreateCompatibleDC(hdcSrc);
@@ -61,10 +60,10 @@ namespace Monkeysoft.Screenshot.Driver
             return bmp;
         }
 
-        public static bool IsDWMEnabled() => Environment.OSVersion.Version.Major >= 6 && NativeMethods.DwmIsCompositionEnabled();
-        public static bool IsWindows10OrGreater() => Environment.OSVersion.Version.Major >= 10;
+        private bool IsDWMEnabled() => Environment.OSVersion.Version.Major >= 6 && NativeMethods.DwmIsCompositionEnabled();
+        private bool IsWindows10OrGreater() => Environment.OSVersion.Version.Major >= 10;
 
-        public static Bitmap CaptureAllScreens()
+        public Bitmap CaptureAllScreens()
         {
             Rect rect = new Rect(
                 SystemParameters.VirtualScreenLeft,
@@ -85,7 +84,7 @@ namespace Monkeysoft.Screenshot.Driver
             }
         }
 
-        public static Bitmap CaptureRegion()
+        public Bitmap CaptureRegion()
         {
             var bitmap = CaptureAllScreens();
             BitmapSource bgImg = bitmap.ToBitmapSource();
@@ -112,6 +111,27 @@ namespace Monkeysoft.Screenshot.Driver
             return window.SelectedRegion.HasValue ?
                 bitmap.Clip(window.SelectedRegion.Value) :
                 bitmap;
+        }
+
+        public Bitmap? CaptrueWindows() 
+        {
+            List<UserWindow> windows = Process.GetProcesses()
+                .Where(p => p.MainWindowHandle.IsWindowValidForCapture())
+                .Select(p => new UserWindow
+                {
+                    Name = string.IsNullOrEmpty(p.MainWindowTitle) ? p.ProcessName : p.MainWindowTitle,
+                    WindowHandle = p.MainWindowHandle
+                })
+                .ToList();
+
+            WindowPicker window = new WindowPicker();
+            window.List.ItemsSource = windows;
+            if (window.ShowDialog() ?? false)
+            {
+                return CaptureWindow(windows[window.List.SelectedIndex].WindowHandle);
+            }
+
+            return null;
         }
     }
 }

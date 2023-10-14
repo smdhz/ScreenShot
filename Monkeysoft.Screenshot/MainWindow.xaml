@@ -35,7 +35,7 @@
                     </Style>
                 </StackPanel.Resources>
                 <Button Click="ClipRegion">Region</Button>
-                <Button Click="ClipWindow">Window</Button>
+                <Button Click="ClipWindows">Windows</Button>
                 <Rectangle Height="36" Width="1" Margin="5,0" Fill="DarkGray" Opacity="0.9"/>
                 <Button Click="Exit" Margin="10,0,0,0">Exit</Button>
             </StackPanel>

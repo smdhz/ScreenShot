@@ -70,6 +70,12 @@ namespace Monkeysoft.Screenshot.Driver
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool EnumThreadWindows(uint dwThreadId, EnumWindowsProc lpfn, IntPtr lParam);
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetAncestor(IntPtr hwnd, GetAncestorFlags flags);
+
+        [DllImport("user32.dll")]
+        public static extern bool IsWindowEnabled(IntPtr hwnd);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 

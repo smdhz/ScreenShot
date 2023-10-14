@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -12,6 +15,8 @@ namespace Monkeysoft.Screenshot
     {
         [DllImport("UXTheme.dll", SetLastError = true, EntryPoint = "#138")]
         private static extern bool ShouldSystemUseDarkMode();
+
+        private Driver.Screenshot Driver = Screenshot.Driver.Screenshot.GetInstance();
 
         public MainWindow()
         {
@@ -33,17 +38,27 @@ namespace Monkeysoft.Screenshot
         private void ClipRegion(object sender, RoutedEventArgs e)
         {
             Hide();
-            Clipboard.SetImage(Driver.Screenshot.CaptureRegion().ToBitmapSource());
+            Clipboard.SetImage(Driver.CaptureRegion().ToBitmapSource());
+            Application.Current.Shutdown();
+        }
+
+        private void ClipWindows(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            var ret = Driver.CaptrueWindows();
+            if (ret != null)
+            {
+                Clipboard.SetImage(ret.ToBitmapSource());
+            }
             Application.Current.Shutdown();
         }
 
         private void Exit(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+    }
 
-        private void ClipWindow(object sender, RoutedEventArgs e)
-        {
-            //Hide();
-            Clipboard.SetImage(Driver.Screenshot.CaptureWindow(new WindowInteropHelper(this).Handle).ToBitmapSource());
-            Application.Current.Shutdown();
-        }
+    public class UserWindow 
+    {
+        public string Name { get; set; }
+        public IntPtr WindowHandle { get; set; }
     }
 }

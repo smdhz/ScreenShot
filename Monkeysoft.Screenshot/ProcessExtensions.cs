@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Monkeysoft.Screenshot.Driver;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,18 +11,12 @@ namespace Monkeysoft.Screenshot
 {
     internal static class ProcessExtensions
     {
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
-
         public static int GetWindowZOrder(this Process process)
         {
-            const uint GW_HWNDPREV = 3;
-            const uint GW_HWNDLAST = 1;
-
             IntPtr hwnd = process.MainWindowHandle;
 
             var zindex = 0;
-            var hwndTmp = GetWindow(hwnd, GW_HWNDLAST);
+            var hwndTmp = NativeMethods.GetWindow(hwnd, GetWindowConstants.GW_HWNDLAST);
             while (hwndTmp != IntPtr.Zero)
             {
                 if (hwnd == hwndTmp)
@@ -29,11 +24,42 @@ namespace Monkeysoft.Screenshot
                     return zindex;
                 }
 
-                hwndTmp = GetWindow(hwndTmp, GW_HWNDPREV);
+                hwndTmp = NativeMethods.GetWindow(hwndTmp, GetWindowConstants.GW_HWNDPREV);
                 zindex++;
             }
 
             return -1;
+        }
+
+        public static bool IsWindowValidForCapture(this IntPtr hwnd)
+        {
+            if (hwnd.ToInt32() == 0)
+            {
+                return false;
+            }
+
+            if (!NativeMethods.IsWindowVisible(hwnd))
+            {
+                return false;
+            }
+
+            if (NativeMethods.GetAncestor(hwnd, GetAncestorFlags.GETROOT) != hwnd)
+            {
+                return false;
+            }
+
+            //if (!NativeMethods.IsWindowEnabled(hwnd))
+            //{
+            //    return false;
+            //}
+
+            var hrTemp = NativeMethods.DwmGetWindowAttribute(hwnd, (int)DWMWINDOWATTRIBUTE.DWMWA_CLOAKED, out bool cloaked, Marshal.SizeOf<bool>());
+            if (hrTemp == 0 && cloaked)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

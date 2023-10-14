@@ -3428,4 +3428,14 @@ namespace Monkeysoft.Screenshot.Driver
         /// <summary>In a Maximize button.</summary>
         HTZOOM = 9,
     }
+
+    public enum GetAncestorFlags
+    {
+        // Retrieves the parent window. This does not include the owner, as it does with the GetParent function.
+        GETPARENT = 1,
+        // Retrieves the root window by walking the chain of parent windows.
+        GETROOT = 2,
+        // Retrieves the owned root window by walking the chain of parent and owner windows returned by GetParent.
+        GETROOTOWNER = 3
+    }
 }
