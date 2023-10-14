@@ -25,7 +25,8 @@ namespace Monkeysoft.Screenshot
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string key = ShouldSystemUseDarkMode() ? "Dark" : "Light";
+            //string key = ShouldSystemUseDarkMode() ? "Dark" : "Light";
+            string key = "Light";
 
             Top = 20;
             Resources.MergedDictionaries.Add(
@@ -33,6 +34,13 @@ namespace Monkeysoft.Screenshot
                 {
                     Source = new Uri($"/Themes/{key}.xaml", UriKind.RelativeOrAbsolute)
                 });
+        }
+
+        private void ClipAll(object sender, RoutedEventArgs e)
+        {
+            Hide();
+            Clipboard.SetImage(Driver.CaptureAllScreens().ToBitmapSource());
+            Application.Current.Shutdown();
         }
 
         private void ClipRegion(object sender, RoutedEventArgs e)

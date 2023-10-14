@@ -91,11 +91,6 @@ namespace Monkeysoft.Screenshot.Driver
 
             var window = new RegionSelectionWindow
             {
-                WindowStyle = WindowStyle.None,
-                ResizeMode = ResizeMode.NoResize,
-                //Topmost = true,
-                //ShowInTaskbar = false,
-                BorderThickness = new Thickness(0),
                 Background =
                 {
                     Source = bgImg,

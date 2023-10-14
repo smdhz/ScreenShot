@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Monkeysoft.Screenshot"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen"
-        Title="WindowPicker" Height="240" Width="320">
+        Title="WindowPicker" Height="240" Width="320" ShowInTaskbar="False">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
