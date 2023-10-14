@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -10,21 +11,58 @@ using System.Windows.Documents.DocumentStructures;
 using System.Windows.Media.Imaging;
 using Size = System.Drawing.Size;
 
-namespace Monkeysoft.Screenshot
+namespace Monkeysoft.Screenshot.Driver
 {
     public class Screenshot
     {
-        [DllImport("user32.dll")]
-        private static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct RECT
+        public static Bitmap CaptureWindow(IntPtr handle)
         {
-            public int left;
-            public int top;
-            public int right;
-            public int bottom;
+            var bitmap = CaptureAllScreens();
+            Rectangle rect = Rectangle.Empty;
+
+            if (IsDWMEnabled() && NativeMethods.GetExtendedFrameBounds(handle, out Rectangle tempRect))
+            {
+                rect = tempRect;
+            }
+
+            if (rect.IsEmpty)
+            {
+                rect = NativeMethods.GetWindowRect(handle);
+            }
+
+            if (!IsWindows10OrGreater() && NativeMethods.IsZoomed(handle))
+            {
+                rect = NativeMethods.MaximizedWindowFix(handle, rect);
+            }
+
+            rect = Rectangle.Intersect(new Rectangle(
+                (int)SystemParameters.VirtualScreenLeft,
+                (int)SystemParameters.VirtualScreenTop,
+                (int)SystemParameters.VirtualScreenWidth,
+                (int)SystemParameters.VirtualScreenHeight), rect);
+
+            return CaptureRectangleNative(NativeMethods.GetDesktopWindow(), rect);
         }
+
+        private static Bitmap CaptureRectangleNative(IntPtr handle, Rectangle rect)
+        {
+            IntPtr hdcSrc = NativeMethods.GetWindowDC(handle);
+            IntPtr hdcDest = NativeMethods.CreateCompatibleDC(hdcSrc);
+            IntPtr hBitmap = NativeMethods.CreateCompatibleBitmap(hdcSrc, rect.Width, rect.Height);
+            IntPtr hOld = NativeMethods.SelectObject(hdcDest, hBitmap);
+            NativeMethods.BitBlt(hdcDest, 0, 0, rect.Width, rect.Height, hdcSrc, rect.X, rect.Y, CopyPixelOperation.SourceCopy | CopyPixelOperation.CaptureBlt);
+
+            NativeMethods.SelectObject(hdcDest, hOld);
+            NativeMethods.DeleteDC(hdcDest);
+            NativeMethods.ReleaseDC(handle, hdcSrc);
+            Bitmap bmp = Image.FromHbitmap(hBitmap);
+            NativeMethods.DeleteObject(hBitmap);
+
+            return bmp;
+        }
+
+        public static bool IsDWMEnabled() => Environment.OSVersion.Version.Major >= 6 && NativeMethods.DwmIsCompositionEnabled();
+        public static bool IsWindows10OrGreater() => Environment.OSVersion.Version.Major >= 10;
 
         public static Bitmap CaptureAllScreens()
         {
@@ -74,29 +112,6 @@ namespace Monkeysoft.Screenshot
             return window.SelectedRegion.HasValue ?
                 bitmap.Clip(window.SelectedRegion.Value) :
                 bitmap;
-        }
-
-        public static Bitmap CaptureMonitor()
-        {
-            var bitmap = CaptureAllScreens();
-            List<Bitmap> list = new List<Bitmap>();
-            float offset = 0;
-
-            foreach (var m in MonitorManager.GetMonitors().OrderBy(i => i.MonitorArea.X))
-            {
-                list.Add(bitmap.Clip(new Rect(
-                    offset,
-                    SystemParameters.VirtualScreenHeight - m.ScreenSize.Y,
-                    m.ScreenSize.X,
-                    m.ScreenSize.Y)));
-                offset += m.ScreenSize.X;
-            }
-
-            var window = new MonitorSelection();
-            window.lstGallery.ItemsSource = list.Select(i => i.ToBitmapSource());
-
-            window.ShowDialog();
-            return list[window.lstGallery.SelectedIndex];
         }
     }
 }

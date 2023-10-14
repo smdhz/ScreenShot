@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace Monkeysoft.Screenshot
 {
@@ -32,16 +33,16 @@ namespace Monkeysoft.Screenshot
         private void ClipRegion(object sender, RoutedEventArgs e)
         {
             Hide();
-            Clipboard.SetImage(Screenshot.CaptureRegion().ToBitmapSource());
+            Clipboard.SetImage(Driver.Screenshot.CaptureRegion().ToBitmapSource());
             Application.Current.Shutdown();
         }
 
         private void Exit(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 
-        private void ClipMonitor(object sender, RoutedEventArgs e)
+        private void ClipWindow(object sender, RoutedEventArgs e)
         {
-            Hide();
-            Clipboard.SetImage(Screenshot.CaptureMonitor().ToBitmapSource());
+            //Hide();
+            Clipboard.SetImage(Driver.Screenshot.CaptureWindow(new WindowInteropHelper(this).Handle).ToBitmapSource());
             Application.Current.Shutdown();
         }
     }
