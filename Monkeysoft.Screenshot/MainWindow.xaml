@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Monkeysoft.Screenshot"
         mc:Ignorable="d" Title="MainWindow" WindowStyle="None" SizeToContent="WidthAndHeight"
         AllowsTransparency="True" Background="Transparent"
-        Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
+        Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Icon="/phot_6077.ico">
 
     <Border Background="{DynamicResource BackGround}" BorderThickness="2" CornerRadius="3" Padding="20,10">
         <Border.BorderBrush>
