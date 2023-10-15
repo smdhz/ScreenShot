@@ -33,13 +33,13 @@ namespace Monkeysoft.Screenshot.Driver
 {
     public static partial class NativeMethods
     {
-        public static string GetForegroundWindowText()
+        public static string? GetForegroundWindowText()
         {
             IntPtr handle = GetForegroundWindow();
             return GetWindowText(handle);
         }
 
-        public static string GetWindowText(IntPtr handle)
+        public static string? GetWindowText(IntPtr handle)
         {
             if (handle.ToInt32() > 0)
             {
@@ -66,21 +66,21 @@ namespace Monkeysoft.Screenshot.Driver
             return null;
         }
 
-        public static Process GetForegroundWindowProcess()
+        public static Process? GetForegroundWindowProcess()
         {
             IntPtr handle = GetForegroundWindow();
             return GetProcessByWindowHandle(handle);
         }
 
-        public static string GetForegroundWindowProcessName()
+        public static string? GetForegroundWindowProcessName()
         {
-            using (Process process = GetForegroundWindowProcess())
+            using (Process? process = GetForegroundWindowProcess())
             {
                 return process?.ProcessName;
             }
         }
 
-        public static Process GetProcessByWindowHandle(IntPtr hwnd)
+        public static Process? GetProcessByWindowHandle(IntPtr hwnd)
         {
             if (hwnd.ToInt32() > 0)
             {
@@ -98,7 +98,7 @@ namespace Monkeysoft.Screenshot.Driver
             return null;
         }
 
-        public static string GetClassName(IntPtr handle)
+        public static string? GetClassName(IntPtr handle)
         {
             if (handle.ToInt32() > 0)
             {
@@ -143,36 +143,7 @@ namespace Monkeysoft.Screenshot.Driver
             return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
         }
 
-        private static Icon GetSmallApplicationIcon(IntPtr handle)
-        {
-            IntPtr iconHandle;
-
-            SendMessageTimeout(handle, (int)WindowsMessages.GETICON, NativeConstants.ICON_SMALL2, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
-
-            if (iconHandle == IntPtr.Zero)
-            {
-                SendMessageTimeout(handle, (int)WindowsMessages.GETICON, NativeConstants.ICON_SMALL, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
-
-                if (iconHandle == IntPtr.Zero)
-                {
-                    iconHandle = GetClassLongPtrSafe(handle, NativeConstants.GCL_HICONSM);
-
-                    if (iconHandle == IntPtr.Zero)
-                    {
-                        SendMessageTimeout(handle, (int)WindowsMessages.QUERYDRAGICON, 0, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
-                    }
-                }
-            }
-
-            if (iconHandle != IntPtr.Zero)
-            {
-                return Icon.FromHandle(iconHandle);
-            }
-
-            return null;
-        }
-
-        private static Icon GetBigApplicationIcon(IntPtr handle)
+        private static Icon? GetBigApplicationIcon(IntPtr handle)
         {
             SendMessageTimeout(handle, (int)WindowsMessages.GETICON, NativeConstants.ICON_BIG, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out IntPtr iconHandle);
 
@@ -187,11 +158,6 @@ namespace Monkeysoft.Screenshot.Driver
             }
 
             return null;
-        }
-
-        public static Icon GetApplicationIcon(IntPtr handle)
-        {
-            return GetSmallApplicationIcon(handle) ?? GetBigApplicationIcon(handle);
         }
 
         public static bool GetBorderSize(IntPtr handle, out Size size)
@@ -268,79 +234,6 @@ namespace Monkeysoft.Screenshot.Driver
             return windowRect;
         }
 
-        public static Rectangle GetTaskbarRectangle()
-        {
-            APPBARDATA abd = APPBARDATA.NewAPPBARDATA();
-            SHAppBarMessage((uint)ABMsg.ABM_GETTASKBARPOS, ref abd);
-            return abd.rc;
-        }
-
-        public static bool IsActive(IntPtr handle)
-        {
-            return GetForegroundWindow() == handle;
-        }
-
-        public static void RestoreWindow(IntPtr handle)
-        {
-            WINDOWPLACEMENT wp = new WINDOWPLACEMENT();
-            wp.length = Marshal.SizeOf(wp);
-
-            if (GetWindowPlacement(handle, ref wp))
-            {
-                if (wp.flags == (int)WindowPlacementFlags.WPF_RESTORETOMAXIMIZED)
-                {
-                    wp.showCmd = WindowShowStyle.ShowMaximized;
-                }
-                else
-                {
-                    wp.showCmd = WindowShowStyle.Restore;
-                }
-
-                SetWindowPlacement(handle, ref wp);
-            }
-        }
-
-        /// <summary>
-        /// Version of <see cref="AVISaveOptions(IntPtr, int, int, IntPtr[], IntPtr[])"/> for one stream only.
-        /// </summary>
-        ///
-        /// <param name="stream">Stream to configure.</param>
-        /// <param name="options">Stream options.</param>
-        ///
-        /// <returns>Returns TRUE if the user pressed OK, FALSE for CANCEL, or an error otherwise.</returns>
-        public static int AVISaveOptions(IntPtr stream, ref AVICOMPRESSOPTIONS options, IntPtr parentWindow)
-        {
-            IntPtr[] streams = new IntPtr[1];
-            IntPtr[] infPtrs = new IntPtr[1];
-
-            // alloc unmanaged memory
-            IntPtr mem = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(AVICOMPRESSOPTIONS)));
-
-            // copy from managed structure to unmanaged memory
-            Marshal.StructureToPtr(options, mem, false);
-
-            streams[0] = stream;
-            infPtrs[0] = mem;
-
-            // show dialog with a list of available compresors and configuration
-            int ret = AVISaveOptions(parentWindow, 0, 1, streams, infPtrs);
-
-            // copy from unmanaged memory to managed structure
-            options = (AVICOMPRESSOPTIONS)Marshal.PtrToStructure(mem, typeof(AVICOMPRESSOPTIONS));
-
-            // free AVI compression options
-            AVISaveOptionsFree(1, infPtrs);
-
-            // clear it, because the information already freed by AVISaveOptionsFree
-            options.format = 0;
-            options.parameters = 0;
-
-            // free unmanaged memory
-            Marshal.FreeHGlobal(mem);
-
-            return ret;
-        }
-
         /// <summary>
         /// .NET replacement of mmioFOURCC macros. Converts four characters to code.
         /// </summary>
@@ -375,73 +268,6 @@ namespace Monkeysoft.Screenshot.Driver
                     chs[i] = ' ';
             }
             return new string(chs);
-        }
-
-        public static void OpenFolderAndSelectFile(string filePath)
-        {
-            IntPtr pidl = ILCreateFromPathW(filePath);
-
-            try
-            {
-                SHOpenFolderAndSelectItems(pidl, 0, IntPtr.Zero, 0);
-            }
-            finally
-            {
-                ILFree(pidl);
-            }
-        }
-
-        public static bool CreateProcess(string path, string arguments, CreateProcessFlags flags = CreateProcessFlags.NORMAL_PRIORITY_CLASS)
-        {
-            //PROCESS_INFORMATION pInfo = new PROCESS_INFORMATION();
-            STARTUPINFO sInfo = new STARTUPINFO();
-            SECURITY_ATTRIBUTES pSec = new SECURITY_ATTRIBUTES();
-            SECURITY_ATTRIBUTES tSec = new SECURITY_ATTRIBUTES();
-            pSec.nLength = Marshal.SizeOf(pSec);
-            tSec.nLength = Marshal.SizeOf(tSec);
-
-            return CreateProcess(path, $"\"{path}\" {arguments}", ref pSec, ref tSec, false, (uint)flags, IntPtr.Zero, null, ref sInfo, out _);
-        }
-
-        public static Icon GetFileIcon(string filePath, bool isSmallIcon)
-        {
-            SHFILEINFO shfi = new SHFILEINFO();
-
-            SHGFI flags = SHGFI.Icon;
-
-            if (isSmallIcon)
-            {
-                flags |= SHGFI.SmallIcon;
-            }
-            else
-            {
-                flags |= SHGFI.LargeIcon;
-            }
-
-            SHGetFileInfo(filePath, 0, ref shfi, (uint)Marshal.SizeOf(shfi), (uint)flags);
-
-            Icon icon = (Icon)Icon.FromHandle(shfi.hIcon).Clone();
-            DestroyIcon(shfi.hIcon);
-            return icon;
-        }
-
-        public static Icon GetJumboFileIcon(string filePath, bool jumboSize = true)
-        {
-            SHFILEINFO shfi = new SHFILEINFO();
-
-            SHGFI flags = SHGFI.SysIconIndex | SHGFI.UseFileAttributes;
-            SHGetFileInfo(filePath, 0, ref shfi, (uint)Marshal.SizeOf(shfi), (uint)flags);
-
-            IImageList spiml = null;
-            Guid guil = new Guid(NativeConstants.IID_IImageList2);
-
-            SHGetImageList(jumboSize ? NativeConstants.SHIL_JUMBO : NativeConstants.SHIL_EXTRALARGE, ref guil, ref spiml);
-            IntPtr hIcon = IntPtr.Zero;
-            spiml.GetIcon(shfi.iIcon, NativeConstants.ILD_TRANSPARENT | NativeConstants.ILD_IMAGE, ref hIcon);
-
-            Icon icon = (Icon)Icon.FromHandle(hIcon).Clone();
-            DestroyIcon(hIcon);
-            return icon;
         }
 
         public static float GetScreenScalingFactor()
