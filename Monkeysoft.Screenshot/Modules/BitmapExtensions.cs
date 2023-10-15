@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
-namespace Monkeysoft.Screenshot
+namespace Monkeysoft.Screenshot.Modules
 {
     public static class BitmapExtensions
     {

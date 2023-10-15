@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Monkeysoft.Screenshot"
         mc:Ignorable="d" Title="MainWindow" WindowStyle="None" SizeToContent="WidthAndHeight"
-        AllowsTransparency="True" Background="Transparent"
-        Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Icon="/phot_6077.ico">
-
+        AllowsTransparency="True" Background="Transparent" MouseMove="Window_MouseMove" 
+        Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Icon="/scissor_47188.ico">
+    
     <Border Background="{DynamicResource BackGround}" BorderThickness="2" CornerRadius="3" Padding="20,10">
         <Border.BorderBrush>
             <SolidColorBrush Color="{DynamicResource Shadow}"/>
@@ -38,6 +38,15 @@
             <Button Click="ClipAll">
                 <Path Data="M10 21.4v-7.006a.6.6 0 0 1 .6-.6h1.173a.6.6 0 0 0 .504-.275l1.446-2.244a.6.6 0 0 1 .504-.275h3.546a.6.6 0 0 1 .504.275l1.446 2.244a.6.6 0 0 0 .504.275H21.4a.6.6 0 0 1 .6.6V21.4a.6.6 0 0 1-.6.6H10.6a.6.6 0 0 1-.6-.6Z M16 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM3 18v3h2.5M3 9.5v5M3 6V3h3M9.5 3h5M18 3h3v2.5M21 10V8.5" />
             </Button>
+            <ComboBox SelectedIndex="0" Background="{DynamicResource BackGround}" VerticalContentAlignment="Center" Width="86">
+                <ComboBox.BorderBrush>
+                    <SolidColorBrush Color="{DynamicResource Shadow}"/>
+                </ComboBox.BorderBrush>
+                <ComboBoxItem>No Wait</ComboBoxItem>
+                <ComboBoxItem>3s</ComboBoxItem>
+                <ComboBoxItem>5s</ComboBoxItem>
+                <ComboBoxItem>10s</ComboBoxItem>
+            </ComboBox>
             <Rectangle Height="36" Width="1" Margin="5,0" Fill="DarkGray" Opacity="0.9"/>
             <Button Click="Exit" Margin="10,0,0,0">
                 <Path Data="M12 12h7m0 0-3 3m3-3-3-3M19 6V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1" />

@@ -7,9 +7,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using Monkeysoft.Screenshot.Driver;
 using Size = System.Drawing.Size;
 
-namespace Monkeysoft.Screenshot.Driver
+namespace Monkeysoft.Screenshot.Modules
 {
     public class Screenshot
     {
@@ -92,7 +93,7 @@ namespace Monkeysoft.Screenshot.Driver
 
             var window = new RegionSelectionWindow
             {
-                Background =
+                bgImage =
                 {
                     Source = bgImg,
                     Opacity = 0.7d
@@ -109,7 +110,7 @@ namespace Monkeysoft.Screenshot.Driver
                 bitmap;
         }
 
-        public Bitmap? CaptrueWindows() 
+        public Bitmap? CaptrueWindows()
         {
             List<UserWindow> windows = Process.GetProcesses()
                 .Where(p => p.MainWindowHandle.IsWindowValidForCapture())

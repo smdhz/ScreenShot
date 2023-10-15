@@ -4,7 +4,10 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Interop;
+using Monkeysoft.Screenshot.Driver;
+using Monkeysoft.Screenshot.Modules;
 
 namespace Monkeysoft.Screenshot
 {
@@ -16,7 +19,7 @@ namespace Monkeysoft.Screenshot
         [DllImport("UXTheme.dll", SetLastError = true, EntryPoint = "#138")]
         private static extern bool ShouldSystemUseDarkMode();
 
-        private Driver.Screenshot Driver = Screenshot.Driver.Screenshot.GetInstance();
+        private Modules.Screenshot Driver = Modules.Screenshot.GetInstance();
 
         public MainWindow()
         {
@@ -25,10 +28,7 @@ namespace Monkeysoft.Screenshot
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //string key = ShouldSystemUseDarkMode() ? "Dark" : "Light";
-            string key = "Light";
-
-            Top = 20;
+            string key = ShouldSystemUseDarkMode() ? "Dark" : "Light";
             Resources.MergedDictionaries.Add(
                 new ResourceDictionary
                 {
@@ -62,6 +62,12 @@ namespace Monkeysoft.Screenshot
         }
 
         private void Exit(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
+
+        private void Window_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+                DragMove();
+        }
     }
 
     public class UserWindow 

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Monkeysoft.Screenshot
+namespace Monkeysoft.Screenshot.Modules
 {
     internal static class ProcessExtensions
     {

@@ -70,10 +70,5 @@ namespace Monkeysoft.Screenshot
             SelectionBorder.Width = Math.Abs(position.X - _selectionStartPos.Value.X);
             SelectionBorder.Height = Math.Abs(position.Y - _selectionStartPos.Value.Y);
         }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            Activate();
-        }
     }
 }

@@ -4,10 +4,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         mc:Ignorable="d" d:DesignHeight="450" d:DesignWidth="800"
-        Loaded="Window_Loaded" WindowStyle="None" ResizeMode="NoResize" Topmost="True"
+        WindowStyle="None" ResizeMode="NoResize" Topmost="True"
         ShowInTaskbar="False" BorderThickness="0">
     <Canvas>
-        <Image Name="Background"/>
+        <Image Name="bgImage"/>
         <Border Name="SelectionBorder" ClipToBounds="True" BorderThickness="2" BorderBrush="DarkGreen" Opacity="0.8">
             <Canvas Background="LimeGreen" Opacity="0.1"/>
         </Border>
