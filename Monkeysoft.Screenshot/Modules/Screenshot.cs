@@ -14,7 +14,7 @@ namespace Monkeysoft.Screenshot.Modules
 {
     public class Screenshot
     {
-        private static Screenshot instance;
+        private static Screenshot? instance;
         public static Screenshot GetInstance() => instance ??= new Screenshot();
 
         private Bitmap CaptureWindow(IntPtr handle)
@@ -112,14 +112,17 @@ namespace Monkeysoft.Screenshot.Modules
 
         public Bitmap? CaptrueWindows()
         {
-            List<UserWindow> windows = Process.GetProcesses()
-                .Where(p => p.MainWindowHandle.IsWindowValidForCapture())
-                .Select(p => new UserWindow
+            List<UserWindow> windows = new List<UserWindow>();
+            NativeMethods.EnumWindows((hWnd, lParam) =>
+            {
+                if (hWnd.IsWindowValidForCapture()) 
                 {
-                    Name = string.IsNullOrEmpty(p.MainWindowTitle) ? p.ProcessName : p.MainWindowTitle,
-                    WindowHandle = p.MainWindowHandle
-                })
-                .ToList();
+                    string title = NativeMethods.GetWindowText(hWnd);
+                    if (!string.IsNullOrEmpty(title))
+                        windows.Add(new UserWindow { Name = title, WindowHandle = hWnd });
+                }
+                return windows.Count <= 10;
+            }, IntPtr.Zero);
 
             WindowPicker window = new WindowPicker();
             window.List.ItemsSource = windows;

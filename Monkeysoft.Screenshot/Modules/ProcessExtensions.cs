@@ -11,26 +11,6 @@ namespace Monkeysoft.Screenshot.Modules
 {
     internal static class ProcessExtensions
     {
-        public static int GetWindowZOrder(this Process process)
-        {
-            IntPtr hwnd = process.MainWindowHandle;
-
-            var zindex = 0;
-            var hwndTmp = NativeMethods.GetWindow(hwnd, GetWindowConstants.GW_HWNDLAST);
-            while (hwndTmp != IntPtr.Zero)
-            {
-                if (hwnd == hwndTmp)
-                {
-                    return zindex;
-                }
-
-                hwndTmp = NativeMethods.GetWindow(hwndTmp, GetWindowConstants.GW_HWNDPREV);
-                zindex++;
-            }
-
-            return -1;
-        }
-
         public static bool IsWindowValidForCapture(this IntPtr hwnd)
         {
             if (hwnd.ToInt32() == 0)
@@ -48,10 +28,10 @@ namespace Monkeysoft.Screenshot.Modules
                 return false;
             }
 
-            //if (!NativeMethods.IsWindowEnabled(hwnd))
-            //{
-            //    return false;
-            //}
+            if (!NativeMethods.IsWindowEnabled(hwnd))
+            {
+                return false;
+            }
 
             var hrTemp = NativeMethods.DwmGetWindowAttribute(hwnd, (int)DWMWINDOWATTRIBUTE.DWMWA_CLOAKED, out bool cloaked, Marshal.SizeOf<bool>());
             if (hrTemp == 0 && cloaked)

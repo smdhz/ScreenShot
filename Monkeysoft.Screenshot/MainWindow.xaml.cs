@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -16,10 +17,15 @@ namespace Monkeysoft.Screenshot
     /// </summary>
     public partial class MainWindow : Window
     {
-        [DllImport("UXTheme.dll", SetLastError = true, EntryPoint = "#138")]
-        private static extern bool ShouldSystemUseDarkMode();
-
         private Modules.Screenshot Driver = Modules.Screenshot.GetInstance();
+
+        private static readonly TimeSpan[] Spans = new TimeSpan[] 
+        {
+            TimeSpan.Zero,
+            TimeSpan.FromSeconds(3),
+            TimeSpan.FromSeconds(5),
+            TimeSpan.FromSeconds(10)
+        };
 
         public MainWindow()
         {
@@ -28,17 +34,15 @@ namespace Monkeysoft.Screenshot
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string key = ShouldSystemUseDarkMode() ? "Dark" : "Light";
-            Resources.MergedDictionaries.Add(
-                new ResourceDictionary
-                {
-                    Source = new Uri($"/Themes/{key}.xaml", UriKind.RelativeOrAbsolute)
-                });
+            Top = 10;
+            Left = (SystemParameters.WorkArea.Width - Width) / 2;
         }
 
         private void ClipAll(object sender, RoutedEventArgs e)
         {
             Hide();
+            Task.Delay(Spans[cmbWait.SelectedIndex]).Wait();
+
             Clipboard.SetImage(Driver.CaptureAllScreens().ToBitmapSource());
             Application.Current.Shutdown();
         }
@@ -46,6 +50,8 @@ namespace Monkeysoft.Screenshot
         private void ClipRegion(object sender, RoutedEventArgs e)
         {
             Hide();
+            Task.Delay(Spans[cmbWait.SelectedIndex]).Wait();
+
             Clipboard.SetImage(Driver.CaptureRegion().ToBitmapSource());
             Application.Current.Shutdown();
         }
@@ -53,6 +59,8 @@ namespace Monkeysoft.Screenshot
         private void ClipWindows(object sender, RoutedEventArgs e)
         {
             Hide();
+            Task.Delay(Spans[cmbWait.SelectedIndex]).Wait();
+
             var ret = Driver.CaptrueWindows();
             if (ret != null)
             {
@@ -63,7 +71,7 @@ namespace Monkeysoft.Screenshot
 
         private void Exit(object sender, RoutedEventArgs e) => Application.Current.Shutdown();
 
-        private void Window_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        private void Window_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
                 DragMove();
@@ -72,7 +80,7 @@ namespace Monkeysoft.Screenshot
 
     public class UserWindow 
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public IntPtr WindowHandle { get; set; }
     }
 }
