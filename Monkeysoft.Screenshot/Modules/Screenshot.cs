@@ -117,7 +117,7 @@ namespace Monkeysoft.Screenshot.Modules
             {
                 if (hWnd.IsWindowValidForCapture()) 
                 {
-                    string title = NativeMethods.GetWindowText(hWnd);
+                    string? title = NativeMethods.GetWindowText(hWnd);
                     if (!string.IsNullOrEmpty(title))
                         windows.Add(new UserWindow { Name = title, WindowHandle = hWnd });
                 }
